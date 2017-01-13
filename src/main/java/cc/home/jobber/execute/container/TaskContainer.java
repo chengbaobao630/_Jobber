@@ -21,8 +21,4 @@ public interface TaskContainer {
 
     void destory();
 
-    void check();
-
-
-
 }
