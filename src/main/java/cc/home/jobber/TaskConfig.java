@@ -6,36 +6,28 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by cheng on 2017/1/13 0013.
  */
-public class JobConfig {
+public class TaskConfig implements TaskConstant{
 
-    private static final Logger logger = LoggerFactory.getLogger(JobConfig.class);
+    public TaskConfig() {
+    }
 
-    //错误优先
-    public static final int ERROR_FIRST = -1;
-
-    //优先级优先
-    public static final int PRIORITY_FIRST = 9;
-
-    //顺序
-    public static final int NORMAL = 1;
-
-    //错误+优先级
-    public static final int ERROR_PRIORITY = 2;
-
+    private static final Logger logger = LoggerFactory.getLogger(TaskConfig.class);
 
     private int corePoolSize = 4;
 
     private int initDelayTime = 10;
 
+    private int jobDelayTime= 60;
+
     private boolean autoRedo = true;
 
-    private int maxTaskNum = 50;
+    private int maxTaskNum = 20;
 
-    private int errorPassNum = 20;
+    private int errorPassNum = 5;
 
-    private int priPassNum = 30;
+    private int priPassNum = 15;
 
-    private int handlerStrategy = JobConfig.NORMAL;
+    private int handlerStrategy = TaskConfig.NORMAL;
 
     public int getErrorPassNum() {
         return errorPassNum;
@@ -59,9 +51,6 @@ public class JobConfig {
 
     public void setHandlerStrategy(int handlerStrategy) {
         this.handlerStrategy = handlerStrategy;
-    }
-
-    public JobConfig() {
     }
 
     public static Logger getLogger() {
@@ -99,4 +88,13 @@ public class JobConfig {
     public void setMaxTaskNum(int maxTaskNum) {
         this.maxTaskNum = maxTaskNum;
     }
+
+    public int getJobDelayTime() {
+        return jobDelayTime;
+    }
+
+    public void setJobDelayTime(int jobDelayTime) {
+        this.jobDelayTime = jobDelayTime;
+    }
+
 }

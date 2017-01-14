@@ -1,30 +1,30 @@
 package cc.home.jobber.execute.helper;
 
+import cc.home.jobber.execute.container.TaskContainer;
+import cc.home.jobber.execute.listener.DefaultTaskListener;
 import cc.home.jobber.execute.listener.TaskListener;
 import cc.home.jobber.execute.monitor.TaskMonitor;
-import cc.home.jobber.execute.task.Task;
-
-import java.util.List;
+import cc.home.jobber.Task;
 
 /**
  * Created by cheng on 2017/1/13 0013.
  */
-public class TaskHelper{
+public class TaskHelper {
 
-    TaskMonitor taskMonitor;
+    private TaskMonitor taskMonitor;
 
-    TaskListener taskListener;
+    private TaskListener taskListener;
 
+    private TaskContainer container;
 
     public TaskHelper() {
     }
 
-    public void  transport(Task task){
-
+    public Task transport(Task task) {
         per(task);
         process(task);
         after(task);
-
+        return task;
     }
 
     private void after(Task task) {
@@ -32,14 +32,20 @@ public class TaskHelper{
 
     private void process(Task task) {
         taskListener.onTaskAdd(task);
-        check(task);
+        register(task);
     }
 
     private void per(Task task) {
     }
 
-    boolean check(Task task){
-        return taskMonitor.check(task);
+    public void setContainer(TaskContainer container) {
+        this.container = container;
     }
 
+    public void register(Task task) {
+        container.addTask(taskMonitor.check(task),task);
+        if (this.taskListener == null) {
+            this.taskListener = new DefaultTaskListener();
+        }
+    }
 }

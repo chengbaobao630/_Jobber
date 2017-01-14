@@ -1,11 +1,12 @@
-package cc.home.jobber.execute.task;
+package cc.home.jobber;
 
 import cc.home.jobber.execute.process.TaskProcess;
+import cc.home.jobber.execute.task.TaskStatus;
 
 /**
  * Created by cheng on 2016/6/13 0013.
  */
-public interface Task {
+public interface Task extends TaskConstant {
 
     TaskStatus getStatus();
 

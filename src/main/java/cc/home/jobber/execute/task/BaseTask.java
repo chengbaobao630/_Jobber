@@ -1,11 +1,23 @@
 package cc.home.jobber.execute.task;
 
+import cc.home.jobber.Task;
+import cc.home.jobber.execute.helper.TaskHelper;
 import cc.home.jobber.execute.process.TaskProcess;
 
 /**
  * Created by cheng on 2017/1/13 0013.
  */
 public abstract class BaseTask implements Task {
+
+    private TaskHelper taskHelper;
+
+    public BaseTask() {
+        taskHelper = new TaskHelper();
+    }
+
+    public void register(){
+        taskHelper.register(this);
+    }
 
     private TaskStatus status;
 
@@ -90,4 +102,6 @@ public abstract class BaseTask implements Task {
     public int getPriority() {
         return this.priority;
     }
+
+
 }

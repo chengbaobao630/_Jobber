@@ -1,6 +1,6 @@
 package cc.home.jobber.execute.handler;
 
-import cc.home.jobber.execute.task.Task;
+import cc.home.jobber.Task;
 
 import java.util.List;
 

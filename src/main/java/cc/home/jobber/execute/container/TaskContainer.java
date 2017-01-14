@@ -1,6 +1,7 @@
 package cc.home.jobber.execute.container;
 
-import cc.home.jobber.execute.task.Task;
+import cc.home.jobber.execute.monitor.CheckResult;
+import cc.home.jobber.Task;
 
 import java.util.List;
 
@@ -15,10 +16,10 @@ public interface TaskContainer {
 
     List<Task> listErrorTask();
 
-    void addTask();
+    void addTask(CheckResult checkResult,Task task);
 
-    void removeTask();
+    void removeTask(String taskNum);
 
-    void destory();
+    void destroy();
 
 }

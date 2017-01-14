@@ -1,7 +1,7 @@
 package cc.home.jobber.execute.listener;
 
 import cc.home.jobber.execute.process.TaskProcess;
-import cc.home.jobber.execute.task.Task;
+import cc.home.jobber.Task;
 
 /**
  * Created by cheng on 2017/1/13 0013.

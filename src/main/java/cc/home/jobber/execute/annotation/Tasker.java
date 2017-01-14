@@ -8,11 +8,11 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Documented
-public @interface Jobber {
+public @interface Tasker {
 
     String startTime() default "yyyy-MM-dd HH:mm:ss";
 
-    Jobber.Period period() default @Period();
+    Tasker.Period period() default @Period();
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target({})

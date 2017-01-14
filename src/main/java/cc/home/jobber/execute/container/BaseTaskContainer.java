@@ -1,7 +1,9 @@
 package cc.home.jobber.execute.container;
 
-import cc.home.jobber.JobConfig;
-import cc.home.jobber.execute.task.Task;
+
+import cc.home.jobber.execute.monitor.CheckResult;
+import cc.home.jobber.execute.monitor.TaskCheckResult;
+import cc.home.jobber.Task;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -12,31 +14,15 @@ import java.util.List;
  */
 public class BaseTaskContainer implements TaskContainer {
 
-    private JobConfig jobConfig;
+    private TaskList taskList;
 
-    private LinkedList<Task> taskList;
-
-    private ArrayList<Task> errorTasklist;
-
-    public BaseTaskContainer(JobConfig jobConfig) {
-        this.jobConfig = jobConfig;
+    public BaseTaskContainer() {
     }
 
+
+    @Override
     public void init() {
-        taskList=new LinkedList();
-        errorTasklist=new ArrayList<>();
-    }
-
-    public void destory() {
-        if(taskList != null && taskList.size() >= 0 ){
-            taskList.clear();
-            taskList = null;
-        }
-
-        if(errorTasklist != null && errorTasklist.size() >= 0 ){
-            errorTasklist.clear();
-            errorTasklist = null;
-        }
+        taskList=new TaskList();
     }
 
     public List<Task> getTasks() {
@@ -47,11 +33,82 @@ public class BaseTaskContainer implements TaskContainer {
         return null;
     }
 
-    public void addTask() {
+    @Override
+    public void addTask(CheckResult checkResult,Task task) {
+        TaskCheckResult taskCheckResult= (TaskCheckResult) checkResult;
+        taskList.get(taskCheckResult.getRes_code()).add(task);
 
     }
 
-    public void removeTask() {
+    @Override
+    public void removeTask(String taskNum) {
 
     }
+
+    @Override
+    public void destroy() {
+
+    }
+
+
+
+    class TaskList implements Tuple<Integer,List> {
+
+        TaskList[] taskLists;
+
+        private Integer listTag;
+
+        private List data;
+
+        public TaskList() {
+            init();
+        }
+
+        public TaskList(Integer listTag, List data) {
+            this.listTag = listTag;
+            this.data = data;
+        }
+
+        public void init() {
+            taskList=new LinkedList();
+            errorTaskList=new ArrayList<>();
+            redoTaskList = new LinkedList();
+            priTaskList = new LinkedList();
+            taskLists = new TaskList[]{
+                    new TaskList(Task.JOB_ERROR,errorTaskList),
+                    new TaskList(Task.JOB_NORMAL,taskList),
+                    new TaskList(Task.JOB_REDO,redoTaskList),
+                    new TaskList(Task.JOB_PRI,priTaskList)
+            };
+        }
+
+        private  LinkedList<Task> taskList;
+
+        private  ArrayList<Task> errorTaskList;
+
+        private  LinkedList<Task> redoTaskList;
+
+        private  LinkedList<Task> priTaskList;
+
+
+        @Override
+        public List get(Integer tag) {
+            for (TaskList taskList : taskLists){
+                if (taskList.listTag == tag){
+                    return taskList.data;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public void set(Integer integer, List list) {
+
+        }
+
+    }
+
+
+
+
 }
