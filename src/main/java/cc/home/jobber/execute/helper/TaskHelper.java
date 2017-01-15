@@ -3,6 +3,7 @@ package cc.home.jobber.execute.helper;
 import cc.home.jobber.execute.container.TaskContainer;
 import cc.home.jobber.execute.listener.DefaultTaskListener;
 import cc.home.jobber.execute.listener.TaskListener;
+import cc.home.jobber.execute.monitor.BaseTaskMonitor;
 import cc.home.jobber.execute.monitor.TaskMonitor;
 import cc.home.jobber.Task;
 
@@ -18,6 +19,7 @@ public class TaskHelper {
     private TaskContainer container;
 
     public TaskHelper() {
+        taskMonitor = new BaseTaskMonitor();
     }
 
     public Task transport(Task task) {

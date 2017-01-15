@@ -12,12 +12,17 @@ public class BaseTaskMonitor implements TaskMonitor {
 
     private List<CheckStrategy> strategies;
 
-    private CheckResult<Integer ,String> checkResult;
+    private TaskCheckResult checkResult;
 
-    private static final CheckResult<Integer ,String> DEFAULT_SUCCESS=getDefaultSuccess();
+    public BaseTaskMonitor() {
+        strategies = new ArrayList<>();
+        strategies.add(new ProcessCheck());
+    }
+
+    private static final TaskCheckResult DEFAULT_SUCCESS=getDefaultSuccess();
 
     @Override
-    public CheckResult check(Task task) {
+    public TaskCheckResult check(Task task) {
         for (CheckStrategy strategy : strategies){
             if ( !strategy.check(task)){
                 checkResult = strategy.getResult();
@@ -27,13 +32,12 @@ public class BaseTaskMonitor implements TaskMonitor {
         return DEFAULT_SUCCESS;
     }
 
-
     {
         strategies = new ArrayList<>();
     }
 
-    public static CheckResult<Integer,String> getDefaultSuccess() {
-        CheckResult<Integer,String> defaultSuccess=new CheckResult<>();
+    public static TaskCheckResult getDefaultSuccess() {
+        TaskCheckResult defaultSuccess=new TaskCheckResult();
         defaultSuccess.setRes_code(200);
         defaultSuccess.setRes_msg("success");
         return defaultSuccess;

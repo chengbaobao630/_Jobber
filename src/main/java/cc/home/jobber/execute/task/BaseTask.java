@@ -3,19 +3,26 @@ package cc.home.jobber.execute.task;
 import cc.home.jobber.Task;
 import cc.home.jobber.execute.helper.TaskHelper;
 import cc.home.jobber.execute.process.TaskProcess;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by cheng on 2017/1/13 0013.
  */
 public abstract class BaseTask implements Task {
 
-    private TaskHelper taskHelper;
+    private static final Logger logger = LoggerFactory.getLogger(BaseTask.class);
 
-    public BaseTask() {
-        taskHelper = new TaskHelper();
+    private static TaskHelper taskHelper;
+
+    private BaseTask() {
     }
 
-    public void register(){
+    public static void setTaskHelper(TaskHelper taskHelper) {
+        BaseTask.taskHelper = taskHelper;
+    }
+
+    public void register() {
         taskHelper.register(this);
     }
 
@@ -34,12 +41,19 @@ public abstract class BaseTask implements Task {
     private static Integer totalTask = 0;
 
     public BaseTask(long delayTime) {
+        this();
         totalTask++;
         this.delayTime = delayTime;
         this.status = TaskStatus.NEW;
         synchronized (totalTask) {
-            taskNum=this.getClass().getSimpleName() + ":" + (totalTask - 1 );
-            System.out.println(taskNum);
+            String taskNumPrefix = this.getClass().getSimpleName();
+            if ("".equals(taskNumPrefix) || taskNumPrefix == null || taskNumPrefix.length() <= 0) {
+                taskNumPrefix = "anonymousTask";
+            }
+            taskNum = taskNumPrefix + ":" + (totalTask - 1);
+            if (logger.isDebugEnabled()) {
+                logger.debug("task " + taskNum + " created ");
+            }
         }
     }
 
@@ -70,7 +84,6 @@ public abstract class BaseTask implements Task {
 
     @Override
     public void setStatus(TaskStatus status) {
-
     }
 
     @Override
@@ -80,7 +93,7 @@ public abstract class BaseTask implements Task {
 
     @Override
     public void increaseTimes() {
-            this.times ++ ;
+        this.times++;
     }
 
     @Override

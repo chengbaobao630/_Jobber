@@ -17,8 +17,4 @@ public class DefaultTaskListener  implements  TaskListener{
     public void onProcessError(Task task, TaskProcess process) {
 
     }
-
-    public static void main(String[] args) {
-        System.out.println(Task.ERROR_FIRST);
-    }
 }

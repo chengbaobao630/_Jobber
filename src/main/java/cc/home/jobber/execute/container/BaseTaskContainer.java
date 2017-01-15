@@ -1,43 +1,67 @@
 package cc.home.jobber.execute.container;
 
 
+import cc.home.jobber.Task;
 import cc.home.jobber.execute.monitor.CheckResult;
 import cc.home.jobber.execute.monitor.TaskCheckResult;
-import cc.home.jobber.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by cheng on 2017/1/13 0013.
  */
 public class BaseTaskContainer implements TaskContainer {
 
-    private TaskList taskList;
+    private static final Logger logger = LoggerFactory.getLogger(BaseTaskContainer.class);
+
+    private static TaskTuple taskTuple;
 
     public BaseTaskContainer() {
+        this.init();
+    }
+
+    public static Map<String, List<Task>> toMap() {
+        Map<String, List<Task>> listMap = new HashMap<>();
+        listMap.put("_normalTask", taskTuple.taskList);
+        listMap.put("_errorTask", taskTuple.errorTaskList);
+        listMap.put("_priTask", taskTuple.priTaskList);
+        listMap.put("_redoTask", taskTuple.redoTaskList);
+        return listMap;
     }
 
 
     @Override
     public void init() {
-        taskList=new TaskList();
+        taskTuple = new TaskTuple();
     }
 
     public List<Task> getTasks() {
-        return null;
+        return taskTuple.taskList;
     }
 
     public List<Task> listErrorTask() {
-        return null;
+        return taskTuple.errorTaskList;
     }
 
-    @Override
-    public void addTask(CheckResult checkResult,Task task) {
-        TaskCheckResult taskCheckResult= (TaskCheckResult) checkResult;
-        taskList.get(taskCheckResult.getRes_code()).add(task);
+    public List<Task> listPriTask() {
+        return taskTuple.priTaskList;
+    }
 
+    public List<Task> listRedorTask() {
+        return taskTuple.redoTaskList;
+    }
+
+    public List<Task> listNormalTask() {
+        return taskTuple.taskList;
+    }
+
+
+    @Override
+    public void addTask(CheckResult checkResult, Task task) {
+        TaskCheckResult taskCheckResult = (TaskCheckResult) checkResult;
+        taskTuple.get(taskCheckResult.getRes_code()).add(task);
     }
 
     @Override
@@ -51,54 +75,53 @@ public class BaseTaskContainer implements TaskContainer {
     }
 
 
+    class TaskTuple implements Tuple<Integer, List> {
 
-    class TaskList implements Tuple<Integer,List> {
-
-        TaskList[] taskLists;
+        TaskTuple[] taskTuples;
 
         private Integer listTag;
 
         private List data;
 
-        public TaskList() {
+        public TaskTuple() {
             init();
         }
 
-        public TaskList(Integer listTag, List data) {
+        public TaskTuple(Integer listTag, List data) {
             this.listTag = listTag;
             this.data = data;
         }
 
         public void init() {
-            taskList=new LinkedList();
-            errorTaskList=new ArrayList<>();
+            taskList = new LinkedList();
+            errorTaskList = new ArrayList<>();
             redoTaskList = new LinkedList();
             priTaskList = new LinkedList();
-            taskLists = new TaskList[]{
-                    new TaskList(Task.JOB_ERROR,errorTaskList),
-                    new TaskList(Task.JOB_NORMAL,taskList),
-                    new TaskList(Task.JOB_REDO,redoTaskList),
-                    new TaskList(Task.JOB_PRI,priTaskList)
+            taskTuples = new TaskTuple[]{
+                    new TaskTuple(Task.JOB_ERROR, errorTaskList),
+                    new TaskTuple(Task.JOB_NORMAL, taskList),
+                    new TaskTuple(Task.JOB_REDO, redoTaskList),
+                    new TaskTuple(Task.JOB_PRI, priTaskList)
             };
         }
 
-        private  LinkedList<Task> taskList;
+        private LinkedList<Task> taskList;
 
-        private  ArrayList<Task> errorTaskList;
+        private ArrayList<Task> errorTaskList;
 
-        private  LinkedList<Task> redoTaskList;
+        private LinkedList<Task> redoTaskList;
 
-        private  LinkedList<Task> priTaskList;
+        private LinkedList<Task> priTaskList;
 
 
         @Override
         public List get(Integer tag) {
-            for (TaskList taskList : taskLists){
-                if (taskList.listTag == tag){
-                    return taskList.data;
+            for (TaskTuple taskTuple : taskTuples) {
+                if (taskTuple.listTag == tag) {
+                    return taskTuple.data;
                 }
             }
-            return null;
+            return taskList;
         }
 
         @Override
@@ -106,9 +129,19 @@ public class BaseTaskContainer implements TaskContainer {
 
         }
 
+        private List<Task> unionTask() {
+            List<Task> tasks = new ArrayList<>();
+            toList(tasks, taskList, errorTaskList, priTaskList, redoTaskList);
+            return tasks;
+        }
+
+        private void toList(List<Task> resultList, List<Task>... oriLists) {
+            for (List<Task> tasks : oriLists) {
+                ListIterator<Task> it = tasks.listIterator();
+                while (it.hasNext()) {
+                    resultList.add(it.next());
+                }
+            }
+        }
     }
-
-
-
-
 }

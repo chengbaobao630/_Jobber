@@ -9,6 +9,14 @@ public class CheckResult<C,M> {
 
     private M res_msg;
 
+    public CheckResult() {
+    }
+
+    public CheckResult(C res_code, M res_msg) {
+        this.res_code = res_code;
+        this.res_msg = res_msg;
+    }
+
     public C getRes_code() {
         return res_code;
     }

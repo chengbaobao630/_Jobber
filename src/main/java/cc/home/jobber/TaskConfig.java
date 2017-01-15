@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by cheng on 2017/1/13 0013.
  */
-public class TaskConfig implements TaskConstant{
+public class TaskConfig implements TaskConstant {
 
     public TaskConfig() {
     }
@@ -17,7 +17,7 @@ public class TaskConfig implements TaskConstant{
 
     private int initDelayTime = 10;
 
-    private int jobDelayTime= 60;
+    private int jobDelayTime = 60;
 
     private boolean autoRedo = true;
 
@@ -95,6 +95,11 @@ public class TaskConfig implements TaskConstant{
 
     public void setJobDelayTime(int jobDelayTime) {
         this.jobDelayTime = jobDelayTime;
+    }
+
+    public static void main(String[] args) {
+        TaskEngine engine = TaskEngine.build(new TaskConfig(), new CcScheduledThreadPoolExecutor(4));
+        engine.start();
     }
 
 }
