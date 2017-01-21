@@ -13,13 +13,13 @@ import java.util.Map;
 public class TaskEngineTest {
 
     @Before
-    public void start() {
+    public static void start() {
         TaskEngine engine = TaskEngine.build(new TaskConfig(), new CcScheduledThreadPoolExecutor(4));
         engine.start();
     }
 
     @Test
-    public void addTask() {
+    public static void addTask() {
         new BaseTask(10) {
         }.register();
         Map map= BaseTaskContainer.toMap();
@@ -27,5 +27,9 @@ public class TaskEngineTest {
         System.out.println(map.size());
     }
 
+    public static void main(String[] args) {
+        start();
+        addTask();
+    }
 
 }

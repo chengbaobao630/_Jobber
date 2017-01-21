@@ -1,13 +1,11 @@
 package cc.home.jobber;
 
 import cc.home.jobber.execute.container.BaseTaskContainer;
-import cc.home.jobber.execute.container.TaskContainer;
 import cc.home.jobber.execute.helper.TaskHelper;
 import cc.home.jobber.execute.task.BaseTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -23,17 +21,15 @@ public class TaskEngine {
 
     private Semaphore currency;
 
-    private BaseTaskContainer taskContainer;
-
     private TaskHelper taskHelper;
-
+/*
     public void setTaskHelper(TaskHelper taskHelper) {
         this.taskHelper = taskHelper;
     }
 
     public void setTaskContainer(BaseTaskContainer taskContainer) {
         this.taskContainer = taskContainer;
-    }
+    }*/
 
     private TaskConfig taskConfig;
 
@@ -62,8 +58,7 @@ public class TaskEngine {
 
     private void init() {
         this.taskHelper = new TaskHelper();
-        this.taskContainer = new BaseTaskContainer();
-        this.taskHelper.setContainer(this.taskContainer);
+        this.taskHelper.setContainer(new BaseTaskContainer());
         BaseTask.setTaskHelper(taskHelper);
     }
 
@@ -77,6 +72,16 @@ public class TaskEngine {
 
         @Override
         public void run() {
+            try {
+                if (currency.tryAcquire(500, TimeUnit.MILLISECONDS)){
+                    for(Task task:taskHelper.getUseAbleTask(20)){
+                        task.process();
+                        currency.release();
+                    }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 

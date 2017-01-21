@@ -7,6 +7,8 @@ import cc.home.jobber.execute.monitor.BaseTaskMonitor;
 import cc.home.jobber.execute.monitor.TaskMonitor;
 import cc.home.jobber.Task;
 
+import java.util.List;
+
 /**
  * Created by cheng on 2017/1/13 0013.
  */
@@ -49,5 +51,10 @@ public class TaskHelper {
         if (this.taskListener == null) {
             this.taskListener = new DefaultTaskListener();
         }
+    }
+
+    public List<Task> getUseAbleTask(int size){
+//todo
+        return container.getTasks();
     }
 }

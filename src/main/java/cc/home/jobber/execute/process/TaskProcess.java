@@ -7,5 +7,5 @@ import cc.home.jobber.Task;
  */
 public interface TaskProcess {
 
-    void process(Task task) throws Exception;
+    Object process(Task task) throws Exception;
 }

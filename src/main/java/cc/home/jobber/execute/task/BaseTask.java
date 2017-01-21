@@ -16,6 +16,10 @@ public abstract class BaseTask implements Task {
     private static TaskHelper taskHelper;
 
     private BaseTask() {
+        this.taskProcess = task -> {
+            System.out.println(task.getTaskNum());
+            return null;
+        };
     }
 
     public static void setTaskHelper(TaskHelper taskHelper) {
@@ -116,5 +120,13 @@ public abstract class BaseTask implements Task {
         return this.priority;
     }
 
-
+    @Override
+    public Object process(Object... objects) {
+        try {
+            return taskProcess.process(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
