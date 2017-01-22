@@ -2,10 +2,14 @@ package cc.home.jobber;
 
 import cc.home.jobber.execute.container.BaseTaskContainer;
 import cc.home.jobber.execute.helper.TaskHelper;
+import cc.home.jobber.execute.process.TaskProcess;
 import cc.home.jobber.execute.task.BaseTask;
+import cc.home.jobber.execute.task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -63,7 +67,8 @@ public class TaskEngine {
     }
 
     public void start() {
-        currency = new Semaphore(Math.max(1, Runtime.getRuntime().availableProcessors()));
+        currency = new Semaphore(Math.max(Math.max(1, Runtime.getRuntime().availableProcessors()),
+                taskConfig.getCorePoolSize()));
         executorService.scheduleWithFixedDelay(new Executor(), this.taskConfig.getInitDelayTime(),
                 this.taskConfig.getJobDelayTime(), TimeUnit.SECONDS);
     }
@@ -72,15 +77,65 @@ public class TaskEngine {
 
         @Override
         public void run() {
-            try {
-                if (currency.tryAcquire(500, TimeUnit.MILLISECONDS)){
-                    for(Task task:taskHelper.getUseAbleTask(20)){
-                        task.process();
-                        currency.release();
+            List<Task> taskList=taskHelper.getUseAbleTask(taskConfig);
+            Iterator it = taskList.iterator();
+            while (it.hasNext()) {
+                Task task;
+                try {
+                    task = (Task) it.next();
+                    taskHelper.remove(task.getTaskNum());
+                    if (task.getTimes() > task.MAX_RETRY_TIMES) {
+                        task.setStatus(TaskStatus.ABANDON);
+                        taskHelper.register(task);
+                        continue;
+                    } else {
+                        if (task.getStatus().compareTo(TaskStatus.PROCESSING) == 0) {
+                            continue;
+                        } else if (task.getStatus().compareTo(TaskStatus.REDO) == 0) {
+                            task.setStatus(TaskStatus.PROCESSING);
+                            logger.info("task:" + task.getTaskNum() + "================= redo" + (task.getTimes() + 1 ));
+                        } else {
+                            task.setStatus(TaskStatus.PROCESSING);
+                        }
                     }
+                    executorService.schedule(new Runner(task), task.getDelayTime(), TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logger.error(e.getMessage());
+                } finally {
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+
+            }
+        }
+    }
+
+    private class Runner implements Runnable{
+
+        private Task  task;
+
+        public Runner(Task task) {
+            this.task = task;
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (currency.tryAcquire(500, TimeUnit.MILLISECONDS)) {
+                    logger.info("task begin to start:" + task.getTaskNum());
+                    TaskProcess process = task.getProcessHandler();
+                    process.process(task);
+                    task.setStatus(TaskStatus.DOWN);
+                } else {
+                    task.setStatus(TaskStatus.REDO);
+                    logger.error("currency.tryAcquire due to error");
+                }
+            } catch (Exception e) {
+                task.setStatus(TaskStatus.REDO);
+                logger.error("ScheduledExecutorEngine.run due to error", e);
+            } finally {
+                task.increaseTimes(task);
+                taskHelper.register(task);
+                currency.release();
             }
         }
     }

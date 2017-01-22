@@ -16,11 +16,13 @@ public interface Task extends TaskConstant {
 
     Integer getTimes();
 
-    void increaseTimes();
+    void increaseTimes(Task task);
 
     Long getDelayTime();
 
     TaskProcess getProcessHandler();
+
+    void setProcessHandler(TaskProcess processHandler);
 
     String toString();
 
@@ -29,5 +31,9 @@ public interface Task extends TaskConstant {
     int getPriority();
 
     Object process(Object... objects);
+
+    Integer getTotalTimes();
+
+    Integer getSuccessTimes();
 
 }

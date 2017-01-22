@@ -10,14 +10,18 @@ import org.slf4j.LoggerFactory;
  * Created by cheng on 2017/1/13 0013.
  */
 public abstract class BaseTask implements Task {
+    @Override
+    public void setProcessHandler(TaskProcess processHandler) {
+        this.taskProcess = processHandler;
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(BaseTask.class);
 
     private static TaskHelper taskHelper;
 
     private BaseTask() {
-        this.taskProcess = task -> {
-            System.out.println(task.getTaskNum());
+        this.taskProcess = taskProcess -> {
+            System.out.println(this.getTaskNum());
             return null;
         };
     }
@@ -34,6 +38,28 @@ public abstract class BaseTask implements Task {
 
     private Integer times;
 
+    private Integer totalTimes;
+
+    private Integer successTimes;
+
+    @Override
+    public Integer getTotalTimes() {
+        return totalTimes;
+    }
+
+    public void setTotalTimes(Integer totalTimes) {
+        this.totalTimes = totalTimes;
+    }
+
+    @Override
+    public Integer getSuccessTimes() {
+        return successTimes;
+    }
+
+    public void setSuccessTimes(Integer successTimes) {
+        this.successTimes = successTimes;
+    }
+
     private Long delayTime;
 
     private TaskProcess taskProcess;
@@ -44,7 +70,7 @@ public abstract class BaseTask implements Task {
 
     private static Integer totalTask = 0;
 
-    public BaseTask(long delayTime) {
+    public BaseTask(long delayTime,int totalTimes) {
         this();
         totalTask++;
         this.delayTime = delayTime;
@@ -59,6 +85,9 @@ public abstract class BaseTask implements Task {
                 logger.debug("task " + taskNum + " created ");
             }
         }
+        this.totalTimes =totalTimes;
+        this.times = 0;
+        this.successTimes = 0;
     }
 
     public void setTimes(Integer times) {
@@ -88,6 +117,7 @@ public abstract class BaseTask implements Task {
 
     @Override
     public void setStatus(TaskStatus status) {
+        this.status = status;
     }
 
     @Override
@@ -96,8 +126,12 @@ public abstract class BaseTask implements Task {
     }
 
     @Override
-    public void increaseTimes() {
-        this.times++;
+    public void increaseTimes(Task task) {
+       switch (task.getStatus()){
+           case REDO: times ++; break;
+           case DOWN: times = 0; successTimes ++ ; break;
+           default: break;
+       }
     }
 
     @Override

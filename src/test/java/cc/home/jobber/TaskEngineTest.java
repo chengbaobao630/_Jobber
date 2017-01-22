@@ -14,22 +14,34 @@ public class TaskEngineTest {
 
     @Before
     public static void start() {
-        TaskEngine engine = TaskEngine.build(new TaskConfig(), new CcScheduledThreadPoolExecutor(4));
+        TaskConfig taskConfig=new TaskConfig();
+        taskConfig.setJobDelayTime(30);
+        TaskEngine engine = TaskEngine.build(taskConfig, new CcScheduledThreadPoolExecutor(4));
         engine.start();
     }
 
     @Test
     public static void addTask() {
-        new BaseTask(10) {
+        new BaseTask(10,2) {
         }.register();
-        Map map= BaseTaskContainer.toMap();
 
-        System.out.println(map.size());
+//        Map map= BaseTaskContainer.toMap();
+
+//        System.out.println(map.size());
     }
 
     public static void main(String[] args) {
         start();
         addTask();
+        addTask();
+
+        BaseTask task=new BaseTask(10,5) {
+        };
+        task.setProcessHandler(taskProcess -> {
+            System.out.println(task.getTaskNum());
+            return null;
+        });
+        task.register();
     }
 
 }

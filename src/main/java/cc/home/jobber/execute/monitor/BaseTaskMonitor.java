@@ -17,27 +17,30 @@ public class BaseTaskMonitor implements TaskMonitor {
     public BaseTaskMonitor() {
         strategies = new ArrayList<>();
         strategies.add(new ProcessCheck());
+        strategies.add(new StatusCheck());
+        strategies.add(new TimesCheck());
     }
 
-    private static final TaskCheckResult DEFAULT_SUCCESS=getDefaultSuccess();
+    private static final TaskCheckResult DEFAULT_SUCCESS = getDefaultSuccess();
 
     @Override
     public TaskCheckResult check(Task task) {
-        for (CheckStrategy strategy : strategies){
-            if ( !strategy.check(task)){
+        for (CheckStrategy strategy : strategies) {
+            if (!strategy.check(task)) {
                 checkResult = strategy.getResult();
                 return checkResult;
             }
+            checkResult = strategy.getResult();
         }
-        return DEFAULT_SUCCESS;
+        return checkResult == null ? DEFAULT_SUCCESS : checkResult;
     }
 
     {
         strategies = new ArrayList<>();
     }
 
-    public static TaskCheckResult getDefaultSuccess() {
-        TaskCheckResult defaultSuccess=new TaskCheckResult();
+    private static TaskCheckResult getDefaultSuccess() {
+        TaskCheckResult defaultSuccess = new TaskCheckResult();
         defaultSuccess.setRes_code(200);
         defaultSuccess.setRes_msg("success");
         return defaultSuccess;

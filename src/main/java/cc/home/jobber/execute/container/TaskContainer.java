@@ -1,5 +1,6 @@
 package cc.home.jobber.execute.container;
 
+import cc.home.jobber.TaskConfig;
 import cc.home.jobber.execute.monitor.CheckResult;
 import cc.home.jobber.Task;
 
@@ -21,5 +22,7 @@ public interface TaskContainer {
     void removeTask(String taskNum);
 
     void destroy();
+
+    List<Task> getAvlTasks(TaskConfig taskConfig);
 
 }

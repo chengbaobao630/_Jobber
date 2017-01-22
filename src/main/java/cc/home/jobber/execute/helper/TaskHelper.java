@@ -1,5 +1,6 @@
 package cc.home.jobber.execute.helper;
 
+import cc.home.jobber.TaskConfig;
 import cc.home.jobber.execute.container.TaskContainer;
 import cc.home.jobber.execute.listener.DefaultTaskListener;
 import cc.home.jobber.execute.listener.TaskListener;
@@ -18,7 +19,7 @@ public class TaskHelper {
 
     private TaskListener taskListener;
 
-    private TaskContainer container;
+    private static TaskContainer container;
 
     public TaskHelper() {
         taskMonitor = new BaseTaskMonitor();
@@ -53,8 +54,12 @@ public class TaskHelper {
         }
     }
 
-    public List<Task> getUseAbleTask(int size){
-//todo
-        return container.getTasks();
+    public List<Task> getUseAbleTask(TaskConfig taskConfig){
+        return container.getAvlTasks(taskConfig);
     }
+
+    public void remove(String taskNum){
+        container.removeTask(taskNum);
+    }
+
 }

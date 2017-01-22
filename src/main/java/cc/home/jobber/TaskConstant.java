@@ -3,8 +3,9 @@ package cc.home.jobber;
 /**
  * Created by cheng on 2017/1/13 0013.
  */
-interface TaskConstant {
+public interface TaskConstant {
 
+    int MAX_RETRY_TIMES = 5;
 
     int JOB_ERROR = -1;
 
@@ -13,6 +14,8 @@ interface TaskConstant {
     int JOB_REDO = 3;
 
     int JOB_PRI = 9;
+
+    int JOB_DOWN = -9;
 
 
     //错误优先
@@ -25,7 +28,7 @@ interface TaskConstant {
     int NORMAL = 1;
 
     //错误+优先级
-    int ERROR_PRIORITY = 2;
+    int ERROR_PRIORITY = 8;
 
 
 }
