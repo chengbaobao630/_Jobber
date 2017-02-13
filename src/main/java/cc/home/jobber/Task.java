@@ -20,9 +20,9 @@ public interface Task extends TaskConstant {
 
     Long getDelayTime();
 
-    TaskProcess getProcessHandler();
+    TaskProcess getTaskProcess();
 
-    void setProcessHandler(TaskProcess processHandler);
+    void setTaskProcess(TaskProcess processHandler);
 
     String toString();
 
@@ -36,4 +36,7 @@ public interface Task extends TaskConstant {
 
     Integer getSuccessTimes();
 
+    void shutdown() throws InterruptedException;
+
+    boolean isShutdown();
 }

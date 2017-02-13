@@ -21,20 +21,24 @@ public class BaseTaskContainer implements TaskContainer {
 
     private static TaskTuple taskTuple;
 
+
     public BaseTaskContainer() {
         this.init();
     }
 
-    public static Map<String, List<Task>> toMap() {
+    public Map<String, List<Task>> toMap() {
         Map<String, List<Task>> listMap = new HashMap<>();
         listMap.put("_normalTask", taskTuple.taskList);
         listMap.put("_errorTask", taskTuple.errorTaskList);
         listMap.put("_priTask", taskTuple.priTaskList);
         listMap.put("_redoTask", taskTuple.redoTaskList);
+        listMap.put("_finishTask", taskTuple.finishTaskList);
+        listMap.put("_processingTask", taskTuple.processingTaskList);
+        listMap.put("_shutdownTask", taskTuple.shutdownTaskList);
         return listMap;
     }
 
-    private static Map<String,Location> locationMap =new ConcurrentHashMap<>();
+    private static Map<String, Location> locationMap = new ConcurrentHashMap<>();
 
     @Override
     public void init() {
@@ -50,60 +54,70 @@ public class BaseTaskContainer implements TaskContainer {
     }
 
     public List<Task> listErrorTask(int num) {
-        return taskTuple.errorTaskList.subList(0,num -1);
+        return taskTuple.errorTaskList.subList(0, num - 1);
     }
 
     public List<Task> listPriTask() {
         return taskTuple.priTaskList;
     }
 
-    public List<Task> listPriTask(int num) {
+     List<Task> listPriTask(int num) {
         int size = taskTuple.priTaskList.size();
-        return size > 0 ? taskTuple.priTaskList.subList(0 , num -1 > size ? size : num -1) : null;
+        return size > 0 ? taskTuple.priTaskList.subList(0, num - 1 > size ? size : num - 1) : null;
     }
 
     public List<Task> listRedoTask() {
         return taskTuple.redoTaskList;
     }
 
-    public List<Task> listRedoTask(int num) {
+     List<Task> listRedoTask(int num) {
         int size = taskTuple.redoTaskList.size();
-        return size > 0 ? taskTuple.redoTaskList.subList(0 , num -1 > size ? size : num -1) : null;
+        return size > 0 ? taskTuple.redoTaskList.subList(0, num - 1 > size ? size : num - 1) : null;
     }
 
     public List<Task> listNormalTask() {
         return taskTuple.taskList;
     }
 
-    public List<Task> listNormalTask(int num) {
+     List<Task> listNormalTask(int num) {
         int size = taskTuple.taskList.size();
-        return size > 0 ? taskTuple.taskList.subList(0 , num -1 > size ? size : num -1) : null;
+        return size > 0 ? taskTuple.taskList.subList(0, num - 1 > size ? size : num - 1) : null;
     }
 
 
     @Override
     public void addTask(CheckResult checkResult, Task task) {
+        logger.info("addTask :" + task.getTaskNum() + ",status " + task.getStatus());
         TaskCheckResult taskCheckResult = (TaskCheckResult) checkResult;
         int taskTag = taskCheckResult.getRes_code() == 0 ?
                 1 : taskCheckResult.getRes_code();
-        List<Task> tasks=taskTuple.get(taskTag);
+        List<Task> tasks = taskTuple.get(taskTag);
+        if (tasks == null) return ;
         tasks.add(task);
-        locationMap.put(task.getTaskNum(),new Location(taskTag,tasks.size() - 1));
+        locationMap.put(task.getTaskNum(), new Location(taskTag, tasks.size() - 1));
     }
 
     @Override
     public void removeTask(String taskNum) {
         Location location = locationMap.get(taskNum);
-        taskTuple.get(location.getListTag()).set(location.getIndex(),new NullTask(0,0));
+        if (location == null) return ;
+        taskTuple.get(location.getListTag()).set(location.getIndex(), new NullTask(0, 0));
         locationMap.remove(taskNum);
         locationClear();
+    }
+
+
+    public Task getTask(String taskNum){
+        Location location = locationMap.get(taskNum);
+        if (location == null) return null;
+        return taskTuple.get(location.getListTag()).get(location.getIndex());
     }
 
     private void locationClear() {
         for (TaskTuple tuple : taskTuple.taskTuples) {
             for (Object obj : tuple.data) {
-                if( !(obj instanceof NullTask)){
-                    return ;
+                if (!(obj instanceof NullTask)) {
+                    return;
                 }
             }
             tuple.data.clear();
@@ -119,18 +133,21 @@ public class BaseTaskContainer implements TaskContainer {
     @Override
     public List<Task> getAvlTasks(TaskConfig taskConfig) {
         int maxSize = taskConfig.getMaxTaskNum();
-        List<Task> tasks=new ArrayList<>(maxSize);
+        List<Task> tasks = new ArrayList<>(maxSize);
         int priSize = taskConfig.getPriPassNum();
-        List<Task> priLists= listPriTask(priSize);
+        List<Task> priLists = listPriTask(priSize);
         if (priLists != null && priLists.size() > 0)
             tasks.addAll(priLists);
         int redoSize = taskConfig.getRedoPassNum();
-        List<Task> redoLists= listRedoTask(redoSize);
+        List<Task> redoLists = listRedoTask(redoSize);
         if (redoLists != null && redoLists.size() > 0)
             tasks.addAll(redoLists);
-        tasks.addAll(listNormalTask(maxSize - priSize - redoSize));
+        List<Task> normalTasks = listNormalTask(maxSize - priSize - redoSize);
+        if (normalTasks != null && normalTasks.size() > 0)
+            tasks.addAll(normalTasks);
         return tasks;
     }
+
 
 
     class TaskTuple implements Tuple<Integer, List> {
@@ -141,26 +158,30 @@ public class BaseTaskContainer implements TaskContainer {
 
         private List data;
 
-        public TaskTuple() {
+         TaskTuple() {
             init();
         }
 
-        public TaskTuple(Integer listTag, List data) {
+         TaskTuple(Integer listTag, List data) {
             this.listTag = listTag;
             this.data = data;
         }
 
-        public void init() {
+         void init() {
             taskList = new LinkedList();
             errorTaskList = new ArrayList<>();
             finishTaskList = new ArrayList<>();
             redoTaskList = new LinkedList();
             priTaskList = new LinkedList();
+            processingTaskList = new ArrayList();
+            shutdownTaskList = new ArrayList();
             taskTuples = new TaskTuple[]{
                     new TaskTuple(Task.JOB_ERROR, errorTaskList),
                     new TaskTuple(Task.JOB_NORMAL, taskList),
                     new TaskTuple(Task.JOB_REDO, redoTaskList),
                     new TaskTuple(Task.JOB_PRI, priTaskList),
+                    new TaskTuple(Task.JOB_PROCESSING, processingTaskList),
+                    new TaskTuple(Task.JOB_SHUTDOWN, shutdownTaskList),
                     new TaskTuple(Task.JOB_DOWN, finishTaskList)
             };
         }
@@ -174,6 +195,10 @@ public class BaseTaskContainer implements TaskContainer {
         private LinkedList<Task> priTaskList;
 
         private ArrayList<Task> finishTaskList;
+
+        private ArrayList<Task> processingTaskList;
+
+        private ArrayList<Task> shutdownTaskList;
 
 
         @Override
@@ -199,16 +224,15 @@ public class BaseTaskContainer implements TaskContainer {
 
         private void toList(List<Task> resultList, List<Task>... oriLists) {
             for (List<Task> tasks : oriLists) {
-                ListIterator<Task> it = tasks.listIterator();
-                while (it.hasNext()) {
-                    resultList.add(it.next());
+                for (Task task : tasks) {
+                    resultList.add(task);
                 }
             }
         }
     }
 
 
-    private class Location{
+    private class Location {
 
         public Location(int listTag, int index) {
             this.listTag = listTag;

@@ -8,4 +8,6 @@ import cc.home.jobber.Task;
 public interface TaskProcess {
 
     Object process(Task task) throws Exception;
+
+    void shutdown() throws InterruptedException;
 }

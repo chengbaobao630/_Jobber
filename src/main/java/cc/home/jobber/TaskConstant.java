@@ -17,6 +17,10 @@ public interface TaskConstant {
 
     int JOB_DOWN = -9;
 
+    int JOB_PROCESSING = 7;
+
+    int JOB_SHUTDOWN = -7;
+
 
     //错误优先
     int ERROR_FIRST = -1;

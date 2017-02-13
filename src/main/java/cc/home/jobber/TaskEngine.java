@@ -1,13 +1,13 @@
 package cc.home.jobber;
 
 import cc.home.jobber.execute.container.BaseTaskContainer;
-import cc.home.jobber.execute.helper.TaskHelper;
 import cc.home.jobber.execute.process.TaskProcess;
 import cc.home.jobber.execute.task.BaseTask;
 import cc.home.jobber.execute.task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -39,18 +39,16 @@ public class TaskEngine {
 
     private static TaskEngine taskEngine;
 
-    private static TaskEngine build(){
-            return taskEngine;
+    private static TaskEngine build() {
+        return taskEngine;
     }
 
-    public static TaskEngine build(TaskConfig taskConfig, ScheduledExecutorService executorService){
+    public static TaskEngine build(TaskConfig taskConfig, ScheduledExecutorService executorService) {
         if (taskEngine == null) {
             taskEngine = new TaskEngine(taskConfig, executorService);
         }
         return build();
     }
-
-
 
 
     private TaskEngine(TaskConfig taskConfig, ScheduledExecutorService executorService) {
@@ -59,28 +57,39 @@ public class TaskEngine {
         init();
     }
 
+    public TaskEngine( ScheduledExecutorService executorService) {
+        this.taskConfig = new TaskConfig();
+        this.executorService = executorService;
+        init();
+    }
+
 
     private void init() {
-        this.taskHelper = new TaskHelper();
+        this.taskHelper = TaskHelper.newInstance();
         this.taskHelper.setContainer(new BaseTaskContainer());
         BaseTask.setTaskHelper(taskHelper);
     }
 
     public void start() {
+        logger.info("engine begin to start");
         currency = new Semaphore(Math.max(Math.max(1, Runtime.getRuntime().availableProcessors()),
                 taskConfig.getCorePoolSize()));
         executorService.scheduleWithFixedDelay(new Executor(), this.taskConfig.getInitDelayTime(),
                 this.taskConfig.getJobDelayTime(), TimeUnit.SECONDS);
+
+        logger.info("start end with JobDelayTime:"+this.taskConfig.getJobDelayTime());
     }
 
     private class Executor implements Runnable {
 
         @Override
         public void run() {
-            List<Task> taskList=taskHelper.getUseAbleTask(taskConfig);
+            logger.info(" Executor :");
+            List<Task> taskList = taskHelper.getUseAbleTask(taskConfig);
+            logger.info(" Executor :taskList length:"+taskList.size());
             Iterator it = taskList.iterator();
             while (it.hasNext()) {
-                Task task;
+                Task task = null;
                 try {
                     task = (Task) it.next();
                     taskHelper.remove(task.getTaskNum());
@@ -93,7 +102,7 @@ public class TaskEngine {
                             continue;
                         } else if (task.getStatus().compareTo(TaskStatus.REDO) == 0) {
                             task.setStatus(TaskStatus.PROCESSING);
-                            logger.info("task:" + task.getTaskNum() + "================= redo" + (task.getTimes() + 1 ));
+                            logger.info("task:" + task.getTaskNum() + "================= redo" + (task.getTimes() + 1));
                         } else {
                             task.setStatus(TaskStatus.PROCESSING);
                         }
@@ -103,15 +112,16 @@ public class TaskEngine {
                     e.printStackTrace();
                     logger.error(e.getMessage());
                 } finally {
+                    taskHelper.register(task);
                 }
 
             }
         }
     }
 
-    private class Runner implements Runnable{
+    private class Runner implements Runnable {
 
-        private Task  task;
+        private Task task;
 
         public Runner(Task task) {
             this.task = task;
@@ -120,9 +130,10 @@ public class TaskEngine {
         @Override
         public void run() {
             try {
+                logger.info(" Runner :task num:"+task.getTaskNum());
                 if (currency.tryAcquire(500, TimeUnit.MILLISECONDS)) {
                     logger.info("task begin to start:" + task.getTaskNum());
-                    TaskProcess process = task.getProcessHandler();
+                    TaskProcess process = task.getTaskProcess();
                     process.process(task);
                     task.setStatus(TaskStatus.DOWN);
                 } else {

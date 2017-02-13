@@ -5,6 +5,7 @@ import cc.home.jobber.execute.monitor.CheckResult;
 import cc.home.jobber.Task;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by cheng on 2017/1/13 0013.
@@ -24,5 +25,9 @@ public interface TaskContainer {
     void destroy();
 
     List<Task> getAvlTasks(TaskConfig taskConfig);
+
+    Map toMap();
+
+    Task getTask(String taskNum);
 
 }

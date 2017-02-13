@@ -7,9 +7,10 @@ import cc.home.jobber.TaskConstant;
  */
 public enum TaskStatus implements TaskConstant {
     NEW(JOB_NORMAL),
-    PROCESSING,
+    PROCESSING(JOB_PROCESSING),
     ABANDON(JOB_ERROR),
     DOWN(JOB_DOWN),
+    SHUTDOWN(JOB_SHUTDOWN),
     REDO(JOB_REDO);
 
     TaskStatus() {
@@ -30,7 +31,7 @@ public enum TaskStatus implements TaskConstant {
     }
 
     public static void main(String[] args) {
-        System.out.println( PROCESSING.getCode());
+        System.out.println( PROCESSING);
     }
 
 }

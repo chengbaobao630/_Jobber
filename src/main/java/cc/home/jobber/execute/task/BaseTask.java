@@ -1,28 +1,35 @@
 package cc.home.jobber.execute.task;
 
 import cc.home.jobber.Task;
-import cc.home.jobber.execute.helper.TaskHelper;
+import cc.home.jobber.TaskHelper;
 import cc.home.jobber.execute.process.TaskProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
+
 /**
  * Created by cheng on 2017/1/13 0013.
  */
-public abstract class BaseTask implements Task {
-    @Override
-    public void setProcessHandler(TaskProcess processHandler) {
-        this.taskProcess = processHandler;
-    }
+public  class BaseTask implements Task,Serializable {
 
-    private static final Logger logger = LoggerFactory.getLogger(BaseTask.class);
+    private transient static final Logger logger = LoggerFactory.getLogger(BaseTask.class);
 
-    private static TaskHelper taskHelper;
+    private transient static TaskHelper taskHelper;
 
     private BaseTask() {
-        this.taskProcess = taskProcess -> {
-            System.out.println(this.getTaskNum());
-            return null;
+        this.taskProcess = new TaskProcess() {
+            @Override
+            public Object process(Task task) throws Exception {
+                System.out.println(task.getTaskNum());
+                return null;
+            }
+
+            @Override
+            public synchronized void shutdown() throws InterruptedException {
+                    Thread thread=Thread.currentThread();
+                    thread.wait();
+            }
         };
     }
 
@@ -56,13 +63,27 @@ public abstract class BaseTask implements Task {
         return successTimes;
     }
 
+    @Override
+    public void shutdown() throws InterruptedException {
+        this.shutdown = true ;
+        this.taskProcess.shutdown();
+    }
+
+    private boolean shutdown;
+
+
+    @Override
+    public boolean isShutdown() {
+        return shutdown;
+    }
+
     public void setSuccessTimes(Integer successTimes) {
         this.successTimes = successTimes;
     }
 
     private Long delayTime;
 
-    private TaskProcess taskProcess;
+    private transient TaskProcess taskProcess;
 
     private String taskNum = "";
 
@@ -139,10 +160,7 @@ public abstract class BaseTask implements Task {
         return this.delayTime;
     }
 
-    @Override
-    public TaskProcess getProcessHandler() {
-        return this.taskProcess;
-    }
+
 
     @Override
     public String getTaskNum() {
@@ -163,4 +181,5 @@ public abstract class BaseTask implements Task {
             return null;
         }
     }
+
 }

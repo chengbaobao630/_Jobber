@@ -12,7 +12,7 @@ public class ProcessCheck implements CheckStrategy {
 
     @Override
     public boolean check(Task task) {
-        TaskProcess process=task.getProcessHandler();
+        TaskProcess process=task.getTaskProcess();
         if (process == null){
             result = new TaskCheckResult();
             result.setRes_code(Task.JOB_ERROR);

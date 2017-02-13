@@ -30,7 +30,8 @@ public class BaseTaskMonitor implements TaskMonitor {
                 checkResult = strategy.getResult();
                 return checkResult;
             }
-            checkResult = strategy.getResult();
+            if (strategy.getResult() != null)
+                checkResult = strategy.getResult();
         }
         return checkResult == null ? DEFAULT_SUCCESS : checkResult;
     }
