@@ -17,8 +17,8 @@ public class BaseTaskMonitor implements TaskMonitor {
     public BaseTaskMonitor() {
         strategies = new ArrayList<>();
         strategies.add(new ProcessCheck());
-        strategies.add(new StatusCheck());
         strategies.add(new TimesCheck());
+        strategies.add(new StatusCheck());
     }
 
     private static final TaskCheckResult DEFAULT_SUCCESS = getDefaultSuccess();

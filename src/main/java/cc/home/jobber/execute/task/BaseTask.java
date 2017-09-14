@@ -173,7 +173,7 @@ public  class BaseTask implements Task,Serializable {
     }
 
     @Override
-    public Object process(Object... objects) {
+    public Object process(Object... objects) throws Exception {
         try {
             return taskProcess.process(this);
         } catch (Exception e) {

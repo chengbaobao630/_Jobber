@@ -30,7 +30,6 @@ public class TimesCheck implements CheckStrategy {
             task.setStatus(TaskStatus.ABANDON);
             return false;
         }
-
         if (successTimes < totalTimes && TaskStatus.DOWN.equals(task.getStatus())) {
             task.setStatus(TaskStatus.NEW);
         }else if (TaskStatus.DOWN.equals(task.getStatus())){

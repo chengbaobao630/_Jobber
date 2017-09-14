@@ -30,7 +30,7 @@ public interface Task extends TaskConstant {
 
     int getPriority();
 
-    Object process(Object... objects);
+    Object process(Object... objects) throws Exception;
 
     Integer getTotalTimes();
 

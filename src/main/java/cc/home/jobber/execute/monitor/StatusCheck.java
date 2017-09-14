@@ -27,9 +27,6 @@ public class StatusCheck implements CheckStrategy {
             result.setRes_msg("task has been shutdown");
             return false;
         }
-        result = new TaskCheckResult();
-        result.setRes_code(status.getCode());
-        result.setRes_msg("");
         return true;
     }
 

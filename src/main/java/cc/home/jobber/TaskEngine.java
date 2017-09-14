@@ -75,7 +75,7 @@ public class TaskEngine {
         currency = new Semaphore(Math.max(Math.max(1, Runtime.getRuntime().availableProcessors()),
                 taskConfig.getCorePoolSize()));
         executorService.scheduleWithFixedDelay(new Executor(), this.taskConfig.getInitDelayTime(),
-                this.taskConfig.getJobDelayTime(), TimeUnit.SECONDS);
+                this.taskConfig.getJobDelayTime(), TimeUnit.MILLISECONDS);
 
         logger.info("start end with JobDelayTime:"+this.taskConfig.getJobDelayTime());
     }
